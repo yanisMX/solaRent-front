@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
+import { Project } from "../interfaces/interface.ts";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import getData from "../api/getCities.ts";
 
 // Set the default icon URLs with React-Leaflet
 L.Icon.Default.mergeOptions({
@@ -10,63 +13,22 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapComponent = () => {
+  const [projectData, setProjectData] = useState<Project[]>([]);
+
   const franceBounds: [number, number][] = [
     [41.333, -5.225],
     [51.124, 9.662],
   ];
 
-  const projectData = [
-    {
-      latitude: 48.8566,
-      longitude: 2.3522,
-      project_count: 5,
-    },
-    {
-      latitude: 47.2184,
-      longitude: -1.5536,
-      project_count: 3,
-    },
-    {
-      latitude: 43.2965,
-      longitude: 5.3698,
-      project_count: 7,
-    },
-    {
-      latitude: 45.764,
-      longitude: 4.8357,
-      project_count: 4,
-    },
-    {
-      latitude: 44.8378,
-      longitude: -0.5792,
-      project_count: 2,
-    },
-    {
-      latitude: 50.6292,
-      longitude: 3.0573,
-      project_count: 6,
-    },
-    {
-      latitude: 43.6108,
-      longitude: 3.8767,
-      project_count: 8,
-    },
-    {
-      latitude: 48.5839,
-      longitude: 7.7455,
-      project_count: 1,
-    },
-    {
-      latitude: 49.2583,
-      longitude: 4.0317,
-      project_count: 3,
-    },
-    {
-      latitude: 48.1173,
-      longitude: -1.6778,
-      project_count: 4,
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      const data: Project[] = await getData("http://localhost:3000/cities");
+      if (data) {
+        setProjectData(data);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -84,18 +46,34 @@ const MapComponent = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {projectData.map((project, index) => (
-          <Circle
-            key={index}
-            center={[project.latitude, project.longitude]}
-            radius={project.project_count * 10000} // Adjust the multiplier as needed
-            color="red"
-            fillColor="#f03"
-            fillOpacity={0.5}
-          >
-            <Popup>Projects: {project.project_count}</Popup>
-          </Circle>
-        ))}
+        {projectData ? (
+          projectData.map((project, index) => {
+            if (!project.coordinates) return null;
+
+            const [latitude, longitude] = project.coordinates
+              .split(",")
+              .map((coord) => parseFloat(coord));
+
+            return (
+              <Circle
+                key={index}
+                center={[latitude, longitude]}
+                radius={parseInt(project.total_count, 10) * 0.5} // Adjust the multiplier as needed
+                color="red"
+                fillColor="#f03"
+                fillOpacity={0.5}
+              >
+                <Popup>
+                  <b>{project.name}</b>
+                  <br />
+                  Panneaux solaires: {project.total_count}
+                </Popup>
+              </Circle>
+            );
+          })
+        ) : (
+          <p>Error</p>
+        )}
       </MapContainer>
     </div>
   );
