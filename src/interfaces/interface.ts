@@ -6,3 +6,9 @@ export interface Project {
   state_code: string;
   total_count: string; // or number if you prefer to parse it
 }
+
+export interface Departement {
+  code: string;
+  name: string;
+  sun_rate: string;
+}

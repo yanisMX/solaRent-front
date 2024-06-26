@@ -8,7 +8,7 @@ function App() {
     <>
       <Header />
       <div className="flex flex-row items-start justify-start h-screen w-screen">
-        <div className="w-4/5 h-full">
+        <div className="w-3/4 h-full">
           <MapComponent />
         </div>
         <div className="w-1/5 h-full">
