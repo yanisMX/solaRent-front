@@ -5,6 +5,7 @@ const getData = async (url: string) => {
       headers: {
         "Content-Type": "application/json",
       },
+      mode: "cors",
     });
     if (!response.ok) {
       console.log(

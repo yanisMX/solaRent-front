@@ -23,8 +23,10 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data: Project[] = await getData("http://localhost:3000/cities");
+
       if (data) {
-        setProjectData(data);
+        const limitedData = data.slice(0, 100);
+        setProjectData(limitedData);
       }
     };
     fetchData();
@@ -36,7 +38,7 @@ const MapComponent = () => {
         center={[46.603354, 1.888334]}
         zoom={5}
         minZoom={6.5}
-        style={{ height: "100vh", width: "100%" }}
+        style={{ height: "85vh", width: "100%" }}
         zoomSnap={0.5}
         zoomDelta={0.5}
         maxBounds={franceBounds}
@@ -58,15 +60,17 @@ const MapComponent = () => {
               <Circle
                 key={index}
                 center={[latitude, longitude]}
-                radius={parseInt(project.total_count, 10) * 0.5} // Adjust the multiplier as needed
+                radius={parseInt(project.total_count, 10) * 0.5}
                 color="red"
                 fillColor="#f03"
                 fillOpacity={0.5}
               >
                 <Popup>
-                  <b>{project.name}</b>
+                  <span className={"font-bold"}>{project.name}</span>
                   <br />
-                  Panneaux solaires: {project.total_count}
+                  Panneaux solaires : {project.total_count}
+                  <br />
+                  Département : {project.departement_code}
                 </Popup>
               </Circle>
             );
