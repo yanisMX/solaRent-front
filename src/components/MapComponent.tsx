@@ -19,17 +19,54 @@ const MapComponent = () => {
     [51.124, 9.662],
   ];
 
-  const fetchCities = async () => {
-    const data: Project[] = await getData("http://localhost:3000/cities");
+  const fetchCitiesAndDepartments = async () => {
+    const citiesData: Project[] = await getData("http://localhost:3000/cities");
+    const departmentsData: Departement[] = await getData(
+      "http://localhost:3000/departments",
+    );
 
-    if (data) {
-      const limitedData = data.slice(0, 1000);
-      setCities(limitedData);
+    if (citiesData && departmentsData) {
+      const limitedCities = citiesData.slice(0, 1000);
+      setCities(limitedCities);
+      aggregateSolarPanels(limitedCities, departmentsData);
     }
   };
 
+  const aggregateSolarPanels = (
+    cities: Project[],
+    departments: Departement[],
+  ) => {
+    const departmentCounts: { [key: string]: number } = {};
+
+    cities.forEach((city) => {
+      if (city.departement_code) {
+        if (!departmentCounts[city.departement_code]) {
+          departmentCounts[city.departement_code] = 0;
+        }
+        departmentCounts[city.departement_code] += parseInt(
+          city.total_count,
+          10,
+        );
+      }
+    });
+
+    const departmentsArray: Departement[] = Object.keys(departmentCounts).map(
+      (code) => {
+        const department = departments.find((dep) => dep.code === code);
+        return {
+          code,
+          name: department ? department.name : "Unknown",
+          solar_panel_count: departmentCounts[code],
+        };
+      },
+    );
+
+    setDepartements(departmentsArray);
+    console.log(departmentsArray);
+  };
+
   useEffect(() => {
-    fetchCities();
+    fetchCitiesAndDepartments();
   }, []);
 
   return (
@@ -50,10 +87,10 @@ const MapComponent = () => {
         />
         <div>
           {cities ? (
-            cities.map((project, index) => {
-              if (!project.coordinates) return null;
+            cities.map((city, index) => {
+              if (!city.coordinates) return null;
 
-              const [latitude, longitude] = project.coordinates
+              const [latitude, longitude] = city.coordinates
                 .split(",")
                 .map((coord) => parseFloat(coord));
 
@@ -61,17 +98,17 @@ const MapComponent = () => {
                 <Circle
                   key={index}
                   center={[latitude, longitude]}
-                  radius={parseInt(project.total_count, 10) * 0.5}
+                  radius={parseInt(city.total_count, 10) * 0.5}
                   color="red"
                   fillColor="#f03"
                   fillOpacity={0.5}
                 >
                   <Popup>
-                    <span className={"font-bold"}>{project.name}</span>
+                    <span className={"font-bold"}>{city.name}</span>
                     <br />
-                    Panneaux solaires : {project.total_count}
+                    Panneaux solaires : {city.total_count}
                     <br />
-                    Département : {project.departement_code}
+                    Département : {city.departement_code}
                   </Popup>
                 </Circle>
               );
@@ -81,6 +118,23 @@ const MapComponent = () => {
           )}
         </div>
       </MapContainer>
+      <div>
+        {departements.length > 0 && (
+          <div>
+            <h2 className="text-xl mt-4">
+              Nombre de panneaux solaires par département
+            </h2>
+            <ul>
+              {departements.map((departement) => (
+                <li key={departement.code}>
+                  {departement.name} ({departement.code}):{" "}
+                  {departement.solar_panel_count}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

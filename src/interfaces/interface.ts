@@ -10,5 +10,6 @@ export interface Project {
 export interface Departement {
   code: string;
   name: string;
-  sun_rate: string;
+  sun_rate?: string;
+  solar_panel_count?: number;
 }

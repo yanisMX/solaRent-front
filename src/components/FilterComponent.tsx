@@ -11,10 +11,11 @@ import {
   SelectValue,
 } from "./ui/select.tsx";
 
-const FilterComponent = () => {
+const FilterComponent = ({ onSelectDepartment }) => {
   const [departements, setDepartements] = useState<Departement[]>([]);
   const [selectedDepartement, setSelectedDepartement] =
     useState<Departement | null>(null);
+
   const fetchDepartements = async () => {
     const data: Departement[] = await getData(
       "http://localhost:3000/departments",
@@ -34,7 +35,7 @@ const FilterComponent = () => {
   const handleSelectChange = (value: string) => {
     const departement = departements.find((dep) => dep.name === value);
     setSelectedDepartement(departement || null);
-    console.log(departement);
+    onSelectDepartment(departement ? departement.code : null);
   };
 
   useEffect(() => {
@@ -48,15 +49,15 @@ const FilterComponent = () => {
       <RadioGroup defaultValue="option-one">
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="Villes" id="option-one" />
-          <Label htmlFor="option-one">Villes</Label>
+          <Label htmlFor="option-one">Ville</Label>
         </div>
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="Départements" id="option-two" />
-          <Label htmlFor="option-two">Départements</Label>
+          <Label htmlFor="option-two">Département</Label>
         </div>
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="Régionse" id="option-three" />
-          <Label htmlFor="option-three">Régions</Label>
+          <Label htmlFor="option-three">Région</Label>
         </div>
       </RadioGroup>
 
@@ -83,7 +84,7 @@ const FilterComponent = () => {
         {selectedDepartement?.sun_rate ? (
           <div className={"pt-5"}>
             <p>Taux d'ensoleillement en {selectedDepartement.name}: </p>
-            <span>{selectedDepartement.sun_rate}/ 365 jours</span>
+            <span>{selectedDepartement.sun_rate} / 365 jours</span>
           </div>
         ) : (
           <span></span>
