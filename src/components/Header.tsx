@@ -1,3 +1,4 @@
+import React from 'react';
 import { Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -12,8 +13,8 @@ const Header = () => {
   const { setTheme } = useTheme();
   return (
     <div className="navbar bg-base-100 mt-2 flex items-center justify-between px-4 mb-2">
-      <div className="flex-1 text-center">
-        <h1 className="text-3xl">SolaRent</h1>
+      <div className="flex items-center">
+        <img src="/logoSolaRent.png" alt="SolaRent Logo" className="h-10 mr-4" style={{ height: '60px' }} />
       </div>
       <div className="flex-none">
         <DropdownMenu>
