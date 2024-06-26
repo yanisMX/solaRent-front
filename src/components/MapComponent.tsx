@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
-import { Project } from "../interfaces/interface.ts";
+import { Departement, Project } from "../interfaces/interface.ts";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import getData from "../api/getCities.ts";
@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
 
 const MapComponent = () => {
   const [cities, setCities] = useState<Project[]>([]);
-
+  const [departements, setDepartements] = useState<Departement[]>([]);
   const franceBounds: [number, number][] = [
     [41.333, -5.225],
     [51.124, 9.662],
@@ -33,7 +33,7 @@ const MapComponent = () => {
   }, []);
 
   return (
-    <div>
+    <div className={"pl-8"}>
       <MapContainer
         center={[46.603354, 1.888334]}
         zoom={5}

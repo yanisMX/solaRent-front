@@ -13,7 +13,8 @@ import {
 
 const FilterComponent = () => {
   const [departements, setDepartements] = useState<Departement[]>([]);
-
+  const [selectedDepartement, setSelectedDepartement] =
+    useState<Departement | null>(null);
   const fetchDepartements = async () => {
     const data: Departement[] = await getData(
       "http://localhost:3000/departments",
@@ -28,6 +29,12 @@ const FilterComponent = () => {
 
       setDepartements(uniqueDepartements);
     }
+  };
+
+  const handleSelectChange = (value: string) => {
+    const departement = departements.find((dep) => dep.name === value);
+    setSelectedDepartement(departement || null);
+    console.log(departement);
   };
 
   useEffect(() => {
@@ -54,7 +61,7 @@ const FilterComponent = () => {
       </RadioGroup>
 
       <div className={"pt-8"}>
-        <Select>
+        <Select onValueChange={handleSelectChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Départements" />
           </SelectTrigger>
@@ -70,6 +77,17 @@ const FilterComponent = () => {
             )}
           </SelectContent>
         </Select>
+      </div>
+
+      <div>
+        {selectedDepartement?.sun_rate ? (
+          <div className={"pt-5"}>
+            <p>Taux d'ensoleillement en {selectedDepartement.name}: </p>
+            <span>{selectedDepartement.sun_rate}/ 365 jours</span>
+          </div>
+        ) : (
+          <span></span>
+        )}
       </div>
     </div>
   );
