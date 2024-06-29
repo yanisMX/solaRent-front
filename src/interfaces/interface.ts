@@ -1,4 +1,4 @@
-export interface Project {
+export interface City {
   code_name: string;
   coordinates: string;
   departement_code: string;
@@ -7,7 +7,7 @@ export interface Project {
   total_count: string; // or number if you prefer to parse it
 }
 
-export interface Departement {
+export interface Department {
   code: string;
   name: string;
   sun_rate?: string;

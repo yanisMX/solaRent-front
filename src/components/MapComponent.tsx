@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
-import { Departement, Project } from "../interfaces/interface.ts";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import getData from "../api/getCities.ts";
+import { City, Department } from "../interfaces/interface.ts";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-icon-2x.png",
@@ -11,63 +9,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-shadow.png",
 });
 
-const MapComponent = () => {
-  const [cities, setCities] = useState<Project[]>([]);
-  const [departements, setDepartements] = useState<Departement[]>([]);
+const MapComponent = ({ cities, departments, selectedFilter }) => {
   const franceBounds: [number, number][] = [
     [41.333, -5.225],
     [51.124, 9.662],
   ];
-
-  const fetchCitiesAndDepartments = async () => {
-    const citiesData: Project[] = await getData("http://localhost:3000/cities");
-    const departmentsData: Departement[] = await getData(
-      "http://localhost:3000/departments",
-    );
-
-    if (citiesData && departmentsData) {
-      const limitedCities = citiesData.slice(0, 1000);
-      setCities(limitedCities);
-      aggregateSolarPanels(limitedCities, departmentsData);
-    }
-  };
-
-  const aggregateSolarPanels = (
-    cities: Project[],
-    departments: Departement[],
-  ) => {
-    const departmentCounts: { [key: string]: number } = {};
-
-    cities.forEach((city) => {
-      if (city.departement_code) {
-        if (!departmentCounts[city.departement_code]) {
-          departmentCounts[city.departement_code] = 0;
-        }
-        departmentCounts[city.departement_code] += parseInt(
-          city.total_count,
-          10,
-        );
-      }
-    });
-
-    const departmentsArray: Departement[] = Object.keys(departmentCounts).map(
-      (code) => {
-        const department = departments.find((dep) => dep.code === code);
-        return {
-          code,
-          name: department ? department.name : "Unknown",
-          solar_panel_count: departmentCounts[code],
-        };
-      },
-    );
-
-    setDepartements(departmentsArray);
-    console.log(departmentsArray);
-  };
-
-  useEffect(() => {
-    fetchCitiesAndDepartments();
-  }, []);
 
   return (
     <div className={"pl-8"}>
@@ -86,7 +32,7 @@ const MapComponent = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         <div>
-          {cities ? (
+          {selectedFilter === "Villes" &&
             cities.map((city, index) => {
               if (!city.coordinates) return null;
 
@@ -112,23 +58,46 @@ const MapComponent = () => {
                   </Popup>
                 </Circle>
               );
-            })
-          ) : (
-            <p>Error</p>
-          )}
+            })}
+
+          {selectedFilter === "Départements" &&
+            departments.map((department, index) => {
+              if (!department.coordinates) return null;
+
+              const [latitude, longitude] = department.coordinates
+                .split(",")
+                .map((coord) => parseFloat(coord));
+
+              return (
+                <Circle
+                  key={index}
+                  center={[latitude, longitude]} // Utiliser les coordonnées du département
+                  radius={department.solar_panel_count * 7} // Ajuster le rayon en fonction des panneaux solaires
+                  color="red"
+                  fillColor="#f03"
+                  fillOpacity={0.5}
+                >
+                  <Popup>
+                    <span className={"font-bold"}>{department.name}</span>
+                    <br />
+                    Panneaux solaires : {department.solar_panel_count}
+                  </Popup>
+                </Circle>
+              );
+            })}
         </div>
       </MapContainer>
       <div>
-        {departements.length > 0 && (
+        {departments.length > 0 && (
           <div>
             <h2 className="text-xl mt-4">
               Nombre de panneaux solaires par département
             </h2>
             <ul>
-              {departements.map((departement) => (
-                <li key={departement.code}>
-                  {departement.name} ({departement.code}):{" "}
-                  {departement.solar_panel_count}
+              {departments.map((department) => (
+                <li key={department.code}>
+                  {department.name} ({department.code}):{" "}
+                  {department.solar_panel_count}
                 </li>
               ))}
             </ul>

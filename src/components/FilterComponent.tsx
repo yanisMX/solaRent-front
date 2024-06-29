@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Departement } from "../interfaces/interface.ts";
+import { Department } from "../interfaces/interface.ts";
 import getData from "../api/getCities.ts";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group.tsx";
+import { Button } from "./ui/button";
 import { Label } from "./ui/label.tsx";
+import DepartmentData from "./DepartmentData.tsx";
 import {
   Select,
   SelectContent,
@@ -11,42 +13,46 @@ import {
   SelectValue,
 } from "./ui/select.tsx";
 
-const FilterComponent = ({ onSelectDepartment }) => {
-  const [departements, setDepartements] = useState<Departement[]>([]);
-  const [selectedDepartement, setSelectedDepartement] =
-    useState<Departement | null>(null);
+const FilterComponent = ({ onSelectFilter }) => {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState("Villes");
+  const [selectedDepartment, setSelectedDepartment] =
+    useState<Department | null>(null);
 
-  const fetchDepartements = async () => {
-    const data: Departement[] = await getData(
-      "http://localhost:3000/departments",
-    );
-
+  const fetchDepartments = async () => {
+    const data = await getData("http://localhost:3000/departments");
     if (data) {
-      // Déduplication des départements
-      const uniqueDepartements = data.filter(
-        (value, index, self) =>
-          index === self.findIndex((t) => t.name === value.name),
-      );
-
-      setDepartements(uniqueDepartements);
+      setDepartments(data);
     }
   };
 
   const handleSelectChange = (value: string) => {
-    const departement = departements.find((dep) => dep.name === value);
-    setSelectedDepartement(departement || null);
-    onSelectDepartment(departement ? departement.code : null);
+    const department = departments.find((dep) => dep.name === value);
+    setSelectedDepartment(department || null);
+    onSelectFilter(selectedFilter, department ? department.code : null);
+  };
+
+  const handleClickOnReset = () => {
+    setSelectedDepartment(null);
+    onSelectFilter(selectedFilter, null);
   };
 
   useEffect(() => {
-    fetchDepartements();
+    fetchDepartments();
   }, []);
 
   return (
-    <div className={" m-7"}>
-      <p className={"text-2xl"}>Filtrer par </p>
+    <div className={"m-7"}>
+      <p className={"text-2xl"}>Filtrer par</p>
       <hr className={"my-5"} />
-      <RadioGroup defaultValue="option-one">
+      <RadioGroup
+        defaultValue="Villes"
+        onValueChange={(value) => {
+          setSelectedFilter(value);
+          onSelectFilter(value, null);
+          setSelectedDepartment(null); // Réinitialiser la sélection du département lors du changement de filtre
+        }}
+      >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="Villes" id="option-one" />
           <Label htmlFor="option-one">Ville</Label>
@@ -56,40 +62,44 @@ const FilterComponent = ({ onSelectDepartment }) => {
           <Label htmlFor="option-two">Département</Label>
         </div>
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="Régionse" id="option-three" />
+          <RadioGroupItem value="Régions" id="option-three" />
           <Label htmlFor="option-three">Région</Label>
         </div>
       </RadioGroup>
 
-      <div className={"pt-8"}>
-        <Select onValueChange={handleSelectChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Départements" />
-          </SelectTrigger>
-          <SelectContent>
-            {departements.length > 0 ? (
-              departements.map((departement, index) => (
-                <SelectItem value={departement.name} key={index}>
-                  {departement.name}
-                </SelectItem>
-              ))
-            ) : (
-              <SelectItem value="erreur">Aucun département trouvé</SelectItem>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        {selectedDepartement?.sun_rate ? (
-          <div className={"pt-5"}>
-            <p>Taux d'ensoleillement en {selectedDepartement.name}: </p>
-            <span>{selectedDepartement.sun_rate} / 365 jours</span>
+      {selectedFilter === "Départements" && (
+        <>
+          <div className={"flex pt-8"}>
+            <Select
+              onValueChange={handleSelectChange}
+              value={selectedDepartment ? selectedDepartment.name : ""}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Départements" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.length > 0 ? (
+                  departments.map((department, index) => (
+                    <SelectItem value={department.name} key={index}>
+                      {department.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="erreur">
+                    Aucun département trouvé
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <Button className={"ml-6"} onClick={handleClickOnReset}>
+              Reset
+            </Button>
           </div>
-        ) : (
-          <span></span>
-        )}
-      </div>
+          {selectedDepartment && (
+            <DepartmentData department={selectedDepartment} />
+          )}
+        </>
+      )}
     </div>
   );
 };
