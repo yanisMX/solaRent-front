@@ -13,7 +13,11 @@ import {
   SelectValue,
 } from "./ui/select.tsx";
 
-const FilterComponent = ({ onSelectFilter }) => {
+const FilterComponent = ({
+  onSelectFilter,
+}: {
+  onSelectFilter: (filter: string) => void;
+}) => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedFilter, setSelectedFilter] = useState("Villes");
   const [selectedDepartment, setSelectedDepartment] =
@@ -29,12 +33,12 @@ const FilterComponent = ({ onSelectFilter }) => {
   const handleSelectChange = (value: string) => {
     const department = departments.find((dep) => dep.name === value);
     setSelectedDepartment(department || null);
-    onSelectFilter(selectedFilter, department ? department.code : null);
+    onSelectFilter(selectedFilter);
   };
 
   const handleClickOnReset = () => {
     setSelectedDepartment(null);
-    onSelectFilter(selectedFilter, null);
+    onSelectFilter(selectedFilter);
   };
 
   useEffect(() => {
@@ -49,7 +53,7 @@ const FilterComponent = ({ onSelectFilter }) => {
         defaultValue="Villes"
         onValueChange={(value) => {
           setSelectedFilter(value);
-          onSelectFilter(value, null);
+          onSelectFilter(value);
           setSelectedDepartment(null); // Réinitialiser la sélection du département lors du changement de filtre
         }}
       >

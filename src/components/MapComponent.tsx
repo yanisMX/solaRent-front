@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { City, Department } from "../interfaces/interface.ts";
+import { City, Department, franceBounds } from "../interfaces/interface";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-icon-2x.png",
@@ -9,12 +9,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.6/dist/images/marker-shadow.png",
 });
 
-const MapComponent = ({ cities, departments, selectedFilter }) => {
-  const franceBounds: [number, number][] = [
-    [41.333, -5.225],
-    [51.124, 9.662],
-  ];
-
+const MapComponent = ({
+  cities,
+  departments,
+  selectedFilter,
+}: {
+  cities: City[];
+  departments: Department[];
+  selectedFilter: string;
+}) => {
   return (
     <div className={"pl-8"}>
       <MapContainer
@@ -66,13 +69,13 @@ const MapComponent = ({ cities, departments, selectedFilter }) => {
 
               const [latitude, longitude] = department.coordinates
                 .split(",")
-                .map((coord) => parseFloat(coord));
+                .map((coord: string) => parseFloat(coord));
 
               return (
                 <Circle
                   key={index}
                   center={[latitude, longitude]} // Utiliser les coordonnées du département
-                  radius={department.solar_panel_count * 7} // Ajuster le rayon en fonction des panneaux solaires
+                  radius={department ? department.solar_panel_count * 3 : 0} // Ajuster le rayon en fonction des panneaux solaires
                   color="red"
                   fillColor="#f03"
                   fillOpacity={0.5}

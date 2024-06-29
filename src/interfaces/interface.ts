@@ -13,3 +13,8 @@ export interface Department {
   sun_rate?: string;
   solar_panel_count?: number;
 }
+
+export const franceBounds: [number, number][] = [
+  [41.333, -5.225],
+  [51.124, 9.662],
+];

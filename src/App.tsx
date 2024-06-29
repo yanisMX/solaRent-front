@@ -25,7 +25,7 @@ function App() {
       );
 
       if (citiesData && departmentsData) {
-        const limitedCities = citiesData.slice(0, 1000);
+        const limitedCities = citiesData.slice(0, 10000);
         setCities(limitedCities);
         setDepartments(departmentsData);
         setFilteredCities(limitedCities); // Default to showing cities
@@ -66,9 +66,10 @@ function App() {
     );
 
     setFilteredDepartments(departmentsArray);
+    console.log(filteredDepartments);
   };
 
-  const handleSelectFilter = (filter: string, code: string | null) => {
+  const handleSelectFilter = (filter: string) => {
     setSelectedFilter(filter);
     if (filter === "Villes") {
       setFilteredCities(cities);
@@ -80,7 +81,7 @@ function App() {
   };
 
   useEffect(() => {
-    handleSelectFilter(selectedFilter, null);
+    handleSelectFilter(selectedFilter);
   }, []);
 
   return (
