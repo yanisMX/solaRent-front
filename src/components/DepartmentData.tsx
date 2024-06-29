@@ -2,7 +2,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -14,16 +13,20 @@ const DepartmentData = ({ department }: { department: Department }) => {
       <Card>
         <CardHeader>
           <CardTitle>{department.name}</CardTitle>
-          <CardDescription>Card Description</CardDescription>
+          <CardDescription>
+            Taux d'ensoleillement : {department.sun_rate || "N/A"} jours / 365
+            jours par an
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Card Content</p>
+          <p>
+            Ce département contient {department.solar_panel_count || "N/A"}{" "}
+            panneaux solaires
+          </p>
         </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
       </Card>
     </div>
   );
 };
+
 export default DepartmentData;
